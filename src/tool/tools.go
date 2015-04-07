@@ -1,11 +1,13 @@
-package main
+package tool
 
 import (
 	"errors"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 
+	"golang.org/x/net/context"
 	"gopkg.in/yaml.v2"
 )
 
@@ -52,4 +54,35 @@ func ReadConfig(filename string) (cfg Config, err error) {
 	}
 	globalCfg = cfg
 	return
+}
+
+func readDir(ctx context.Context, ch chan string, dir string) {
+	fileList, _ := ioutil.ReadDir(dir)
+	for _, v := range fileList {
+		fp := filepath.Join(dir, v.Name())
+		if v.IsDir() {
+			readDir(ctx, ch, fp)
+		} else {
+			select {
+			case <-ctx.Done():
+				return
+			case ch <- fp:
+			}
+		}
+	}
+}
+
+func ScanDir(ctx context.Context, dir string) <-chan string {
+	ch := make(chan string)
+	go func() {
+		defer close(ch)
+		readDir(ctx, ch, dir)
+	}()
+
+	return ch
+
+}
+
+func UploadFile(ctx context.Context, filename string) {
+	log.Printf("upload [%s] completed", filename)
 }

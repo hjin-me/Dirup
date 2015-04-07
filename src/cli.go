@@ -4,6 +4,10 @@ import (
 	"flag"
 	"log"
 	"path/filepath"
+	"sync"
+	"tool"
+
+	"golang.org/x/net/context"
 )
 
 var (
@@ -23,12 +27,25 @@ func main() {
 		flag.Usage()
 		return
 	}
-	_ = directory
-	cfg, err := ReadConfig(conf)
+	cfg, err := tool.ReadConfig(conf)
 	if err != nil {
 		log.Println(err)
 		return
 	}
 
 	_ = cfg
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	in := tool.ScanDir(ctx, directory)
+
+	var wg sync.WaitGroup
+	for filename := range in {
+		wg.Add(1)
+		go func(f string) {
+			tool.UploadFile(ctx, f)
+			wg.Done()
+		}(filename)
+	}
+
+	wg.Wait()
 }
