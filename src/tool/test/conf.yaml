@@ -1,2 +1,4 @@
 ak: "abc"
 sk: "xyz"
+domain: "http://songst.oss-cn-beijing.aliyuncs.com/"
+bucket: "songst"

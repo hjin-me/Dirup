@@ -42,7 +42,10 @@ func main() {
 	for filename := range in {
 		wg.Add(1)
 		go func(f string) {
-			tool.UploadFile(ctx, f)
+			err := tool.UploadFile(ctx, directory, f)
+			if err != nil {
+				log.Println(f, err)
+			}
 			wg.Done()
 		}(filename)
 	}
