@@ -2,9 +2,12 @@ package main
 
 import (
 	"flag"
+	"io/ioutil"
 	"log"
+	"os"
 	"path/filepath"
 	"sync"
+	"time"
 	"tool"
 
 	"golang.org/x/net/context"
@@ -39,16 +42,50 @@ func main() {
 	in := tool.ScanDir(ctx, directory)
 
 	var wg sync.WaitGroup
-	for filename := range in {
-		wg.Add(1)
-		go func(f string) {
-			err := tool.UploadFile(ctx, directory, f)
+
+	var (
+		success []string
+		fail    []string
+	)
+
+	var process = func(ctx context.Context, f <-chan string) {
+		for filename := range f {
+			err := tool.UploadFile(ctx, directory, filename)
 			if err != nil {
-				log.Println(f, err)
+				fail = append(fail, filename)
+			} else {
+				success = append(success, filename)
 			}
-			wg.Done()
-		}(filename)
+
+			time.Sleep(time.Millisecond * 300)
+		}
+		wg.Done()
 	}
+	wg.Add(5)
+	go process(ctx, in)
+	go process(ctx, in)
+	go process(ctx, in)
+	go process(ctx, in)
+	go process(ctx, in)
 
 	wg.Wait()
+
+	if len(fail) > 0 {
+
+		fname, err := filepath.Abs("./log")
+		if err != nil {
+			log.Println(success)
+			log.Println(fail)
+			log.Fatal(err)
+		}
+		output := ""
+		for _, s := range success {
+			output += s + " success\n"
+		}
+		for _, s := range fail {
+			output += s + " fail\n"
+		}
+
+		ioutil.WriteFile(fname, []byte(output), os.ModePerm)
+	}
 }
