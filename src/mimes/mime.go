@@ -1,11 +1,11 @@
-package tool
+package mimes
 
 import (
 	"path/filepath"
 	"strings"
 )
 
-var mime = map[string]string{
+var mimeMap = map[string]string{
 	".apk": "application/vnd.android.package-archive",
 	".3gp": "video/3gpp", ".ai": "application/postscript",
 	".aif": "audio/x-aiff", ".aifc": "audio/x-aiff",
@@ -118,7 +118,7 @@ var mime = map[string]string{
 
 func MIME(filename string) string {
 	ext := strings.ToLower(filepath.Ext(filename))
-	if value, ok := mime[ext]; ok {
+	if value, ok := mimeMap[ext]; ok {
 		return value
 	}
 

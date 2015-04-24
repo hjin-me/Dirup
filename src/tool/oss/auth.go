@@ -1,4 +1,4 @@
-package tool
+package oss
 
 import (
 	"crypto/hmac"
