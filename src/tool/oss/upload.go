@@ -2,13 +2,14 @@ package oss
 
 import (
 	"errors"
+	"github.com/hjin-me/Dirup/config"
+	"github.com/hjin-me/Dirup/mimes"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
 	"time"
-	"tool"
 
 	"golang.org/x/net/context"
 )
@@ -18,11 +19,12 @@ func UploadFile(ctx context.Context, root, filename string) error {
 	if err != nil {
 		return err
 	}
-	cfg := tool.LoadConfig()
+	cfg := config.LoadConfig()
 	fd, err := os.Open(filename)
 	if err != nil {
 		return err
 	}
+	defer fd.Close()
 
 	request, err := http.NewRequest("PUT", cfg.Prefix+relativePath, fd)
 	if err != nil {
@@ -34,7 +36,7 @@ func UploadFile(ctx context.Context, root, filename string) error {
 	}
 	gmt := time.Now().In(l)
 
-	mm := tool.MIME(filename)
+	mm := mimes.MIME(filename)
 
 	sign, err := HeaderSign(cfg.AccessKey, cfg.SecretKey, "PUT", "", mm, filepath.Join("/", cfg.Bucket, relativePath), "", gmt)
 	if err != nil {

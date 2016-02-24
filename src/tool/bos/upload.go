@@ -2,9 +2,9 @@ package bos
 
 import (
 	"errors"
+	"github.com/hjin-me/Dirup/mimes"
 	"io/ioutil"
 	"log"
-	"mimes"
 	"net/http"
 	"os"
 	"path/filepath"

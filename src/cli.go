@@ -2,24 +2,33 @@ package main
 
 import (
 	"flag"
+	"github.com/hjin-me/Dirup/config"
+	"github.com/hjin-me/Dirup/tool"
 	"io/ioutil"
 	"log"
 	"os"
+	"os/user"
 	"path/filepath"
 	"sync"
 	"time"
-	"tool"
 
+	"fmt"
 	"golang.org/x/net/context"
 )
 
 var (
-	path = flag.String("c", "./conf.yaml", "tool config")
+	path = flag.String("c", "", "tool config, default is ~/.dirup.yaml")
 	dir  = flag.String("i", "./statics", "the directory to be uploaded")
 )
 
 func main() {
 	flag.Parse()
+	if *path == "" {
+		usr, err := user.Current()
+		if err != nil {
+		}
+		*path = filepath.Join(usr.HomeDir, "./.dirup.yaml")
+	}
 	conf, err := filepath.Abs(*path)
 	if err != nil {
 		flag.Usage()
@@ -30,7 +39,7 @@ func main() {
 		flag.Usage()
 		return
 	}
-	cfg, err := tool.ReadConfig(conf)
+	cfg, err := config.ReadConfig(conf)
 	if err != nil {
 		log.Println(err)
 		return
@@ -53,6 +62,7 @@ func main() {
 			err := tool.UploadFile(ctx, directory, filename)
 			if err != nil {
 				fail = append(fail, filename)
+				fmt.Fprintln(os.Stderr, err)
 			} else {
 				success = append(success, filename)
 			}
@@ -87,5 +97,6 @@ func main() {
 		}
 
 		ioutil.WriteFile(fname, []byte(output), os.ModePerm)
+		os.Exit(1)
 	}
 }
