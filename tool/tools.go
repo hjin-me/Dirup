@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"golang.org/x/net/context"
+	"context"
 )
 
 func readDir(ctx context.Context, ch chan string, dir string) {

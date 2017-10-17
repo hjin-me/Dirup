@@ -9,8 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"time"
-
-	"golang.org/x/net/context"
+	"context"
 )
 
 func UploadFile(ctx context.Context, root, filename string) error {
