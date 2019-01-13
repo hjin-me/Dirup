@@ -2,11 +2,10 @@ package config
 
 import (
 	"errors"
+	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
 	"path/filepath"
-
-	"gopkg.in/yaml.v2"
 )
 
 var (
@@ -19,6 +18,7 @@ type Config struct {
 	SecretKey string `yaml:"sk"`
 	Prefix    string `yaml:"domain"`
 	Bucket    string `yaml:"bucket"`
+	Workers   int    `yaml:"workers"`
 }
 
 func LoadConfig() Config {
@@ -51,6 +51,9 @@ func ReadConfig(filename string) (cfg Config, err error) {
 	err = yaml.Unmarshal(bf, &cfg)
 	if err != nil {
 		return
+	}
+	if cfg.Workers == 0 {
+		cfg.Workers = 5
 	}
 	globalCfg = cfg
 	return

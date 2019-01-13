@@ -1,7 +1,9 @@
 package main
 
 import (
+	"context"
 	"flag"
+	"fmt"
 	"github.com/hjin-me/Dirup/config"
 	"github.com/hjin-me/Dirup/tool"
 	"io/ioutil"
@@ -11,9 +13,6 @@ import (
 	"path/filepath"
 	"sync"
 	"time"
-
-	"fmt"
-	"context"
 )
 
 var (
@@ -45,7 +44,6 @@ func main() {
 		return
 	}
 
-	_ = cfg
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	in := tool.ScanDir(ctx, directory)
@@ -71,13 +69,10 @@ func main() {
 		}
 		wg.Done()
 	}
-	wg.Add(5)
-	go process(ctx, in)
-	go process(ctx, in)
-	go process(ctx, in)
-	go process(ctx, in)
-	go process(ctx, in)
-
+	wg.Add(cfg.Workers)
+	for i := 0; i < cfg.Workers; i++ {
+		go process(ctx, in)
+	}
 	wg.Wait()
 
 	if len(fail) > 0 {

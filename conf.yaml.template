@@ -2,3 +2,4 @@ ak: ""
 sk: ""
 domain: "http://bucket.oss-cn-beijing.aliyuncs.com/"
 bucket: "bucket"
+workers: 5
